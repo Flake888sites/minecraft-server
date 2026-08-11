@@ -1,20 +1,23 @@
-FROM ubuntu:22.04
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
+    wget \
     curl \
     unzip \
-    libssl-dev \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -L -o server.zip https://github.com/pmmp/PocketMine-MP/releases/download/4.20.3/PocketMine-MP.phar && \
-    unzip -o server.zip && \
-    rm server.zip || true
+RUN mkdir -p /app/server && cd /app/server && \
+    wget -q https://github.com/PMMP/PocketMine-MP/releases/download/4.23.0/PocketMine-MP.phar && \
+    wget -q https://raw.githubusercontent.com/pmmp/PocketMine-MP/master/start.sh && \
+    chmod +x start.sh
 
-COPY server.properties .
+COPY server.properties /app/server/
 
 EXPOSE 19132/udp
 
-CMD ["php", "PocketMine-MP.phar"]
+WORKDIR /app/server
+
+CMD ["sh", "start.sh"]
